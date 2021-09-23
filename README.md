@@ -1,5 +1,7 @@
 # Svelte学习笔记
-[sveltejs](https://svelte.dev/)文档地址 https://svelte.dev，中文文档地址 https://www.sveltejs.cn/
+[sveltejs](https://svelte.dev/)文档地址 https://svelte.dev
+
+中文文档地址 https://www.sveltejs.cn/
 ## 开始
 创建一个应用，文档参考 https://www.sveltejs.cn/blog/svelte-for-new-developers
 ``` bash
@@ -397,7 +399,7 @@ Svelte中事件修饰符有
 </div>
 ```
 #### number
-Svelte中可以拿到表单中的数值，就是number类型的
+Svelte中可以绑定input到值，当type为number、range时，无需转换，默认就是number类型的
 ``` svelte
 <script>
 	let a = 1;
@@ -416,3 +418,140 @@ Svelte中可以拿到表单中的数值，就是number类型的
 
 <p>{a} + {b} = {a + b}</p>
 ```
+####  单选和多选
+``` html
+<script lang="ts">
+  let yes: string = true
+</script>
+<input type=checkbox bind:checked={yes}>
+{yes}
+<label>
+```
+多个复选框
+``` svelte
+<script lang="ts">
+let menu = [
+	'Cookies and cream',
+	'Mint choc chip',
+	'Raspberry ripple'
+];
+let flavours = ['Mint choc chip'];
+
+</script>
+<h2>Flavours</h2>
+
+{#each menu as flavour}
+	<label>
+		<input type=checkbox bind:group={flavours} value={flavour}>
+		{flavour}
+	</label>
+{/each}
+```
+过个单选框
+``` svelte
+<script lang="ts">
+let scoops = 1
+</script>
+
+<label>
+	<input type=radio bind:group={scoops} value={1}>
+	One scoop
+</label>
+
+<label>
+	<input type=radio bind:group={scoops} value={2}>
+	Two scoops
+</label>
+
+<label>
+	<input type=radio bind:group={scoops} value={3}>
+	Three scoops
+</label>
+```
+#### textarea
+同样适用`bind:value`进行绑定
+``` html
+<textarea bind:value={value}></textarea>
+```
+值与变量名相同，我们也可以使用简写形式
+``` html
+<textarea bind:value></textarea>
+```
+#### select
+同样适用`bind:value`进行绑定
+
+``` html
+<select bind:value={selected} >
+
+```
+
+选择框含有一个名为 multiple 的属性，在这种情况下，它将会被设置为数组而不是单值(vue类似)。
+#### Contenteditable绑定
+支持 contenteditable="true"属性的标签，可以使用 textContent 与 innerHTML 属性的绑定：
+
+``` html
+<div
+	contenteditable="true"
+	bind:innerHTML={html}
+></div>
+```
+### this绑定
+this可以绑定到任何标签 (或组件) 并允许你获取对渲染标签的引用
+``` svelte
+<script lang="ts">
+	import { onMount } from "svelte"
+	let canvas
+	onMount(() => {
+		const ctx = canvas.getContext('2d')
+		// 
+
+	})
+</script>
+
+<canvas bind:this={canvas} width={32} height={32} />
+```
+### 组件绑定
+正如可以绑定到DOM元素的属性一样，你也可以将组件的属性绑定。例如，我们能绑定位于`<Keypad>`组件内的 value 属性，就如同一个表单标签一般：
+
+``` html
+<Keypad bind:value={pin} on:submit={handleSubmit}/>
+```
+## 生命周期
+每个组件都有一个生命周期，从创建时开始，到销毁时结束
+### onMount
+`onMount `第一次渲染到 DOM 之后运行
+
+``` svelte
+<script lang="ts">
+	import { onMount } from "svelte"
+	let canvas
+	onMount(() => {
+		console.log(canvas)
+	})
+</script>
+<canvas bind:this={canvas}></canvas>
+```
+### onDestroy
+`onDestroy `组件销毁时执行
+``` svelte
+<script lang="ts">
+	import { onMount, onDestroy } from "svelte";
+	let canvas;
+	let timer;
+	onMount(() => {
+		console.log(canvas);
+		timer = setInterval(() => {
+			console.log(new Date());
+		}, 2000);
+	});
+	onDestroy(() => {
+		clearInterval(timer);
+	});
+</script>
+
+<canvas bind:this={canvas} />
+```
+### beforeUpdate 和 afterUpdate
+* beforeUpdate 函数实现在DOM渲染完成前执行
+* afterUpdate 渲染完成后执行
+### trick
